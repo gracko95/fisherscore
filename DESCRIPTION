@@ -1,0 +1,27 @@
+Package: fisherscore
+Title: Fisher Scoring for Generalized Linear Models
+Version: 0.1.0
+Authors@R: 
+    person("Grace", "Koo", , "koogc@miamioh.edu", role = c("aut", "cre"))
+Description: Implements Fisher scoring (iteratively reweighted least
+    squares) for generalized linear models from scratch, with a pure R
+    engine and an RcppArmadillo engine, and tools to compare results and
+    speed against stats::glm().
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Suggests: 
+    bench,
+    knitr,
+    MASS,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    graphics,
+    Rcpp,
+    stats
+LinkingTo: 
+    Rcpp,
+    RcppArmadillo
+Config/roxygen2/version: 8.1.0
