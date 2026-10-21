@@ -72,3 +72,8 @@ test_that("empty models fit with eta = offset, as in glm", {
     expect_equal(unname(fitted(f)), unname(fitted(g)))
   }
 })
+
+test_that("extremely small predictor scales still fit correctly in both engines", {
+  d <- data.frame(x = (1:6) * 1e-16, y = c(1, 3, 2, 5, 4, 8))
+  expect_matches_glm(y ~ x, poisson, d, tol = 1e-6)
+})

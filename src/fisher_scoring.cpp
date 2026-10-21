@@ -144,6 +144,7 @@ List fs_fit_cpp(const arma::mat& X, const arma::vec& y, const arma::vec& weights
   coef.fill(NA_REAL);
   arma::vec mu_eta_v(n), z(n), sw(n);
   arma::mat Xw(n, p), R;
+  arma::rowvec colnorm(p);
   bool conv = false, boundary = false;
   int iter = 0;
   std::vector<double> trace_dev;
@@ -159,19 +160,22 @@ List fs_fit_cpp(const arma::mat& X, const arma::vec& y, const arma::vec& weights
       sw[i] = std::sqrt(weights[i] * mu_eta_v[i] * mu_eta_v[i] / variance(mu[i], family_code));
     }
 
-    // 2. Weighted least squares by QR: W^{1/2} X = Q R, then R beta = Q' W^{1/2} z
+    // 2. Weighted least squares by QR. Columns of W^{1/2} X are first scaled to
+    // unit norm (W^{1/2} X = Xs D), so the fit does not depend on predictor
+    // units: Xs = Q R, R gamma = Q' W^{1/2} z, beta = D^{-1} gamma.
     Xw = X.each_col() % sw;
+    colnorm = arma::sqrt(arma::sum(arma::square(Xw), 0));
+    if (arma::any(colnorm == 0.0)) stop("X'WX is singular at iteration %d", iter);
+    Xw.each_row() /= colnorm;
     arma::mat Q;
     if (!arma::qr_econ(Q, R, Xw)) stop("QR decomposition failed at iteration %d", iter);
     // Column j is (numerically) dependent on the earlier ones when |R_jj|, the
-    // norm of the part of column j orthogonal to them, is tiny relative to the
-    // column's own norm. This is unaffected by rescaling a column, and uses the
-    // same tolerance as fs_fit_r().
-    arma::rowvec colnorm = arma::sqrt(arma::sum(arma::square(Xw), 0));
+    // norm of the part of its unit-norm column orthogonal to them, is tiny.
+    // Same tolerance as fs_fit_r().
     for (arma::uword j = 0; j < p; ++j)
-      if (!(std::fabs(R(j, j)) > std::min(1e-7, epsilon / 1000.0) * colnorm[j]))
+      if (!(std::fabs(R(j, j)) > std::min(1e-7, epsilon / 1000.0)))
         stop("X'WX is singular at iteration %d", iter);
-    beta = arma::solve(arma::trimatu(R), Q.t() * (z % sw));
+    beta = arma::solve(arma::trimatu(R), Q.t() * (z % sw)) / colnorm.t();
 
     // 3. New linear predictor, mean and deviance
     eta = X * beta + offset;
@@ -222,8 +226,10 @@ List fs_fit_cpp(const arma::mat& X, const arma::vec& y, const arma::vec& weights
   }
   if (iter > maxit) iter = maxit;
 
-  // Unscaled covariance (X'WX)^{-1} = R^{-1} R^{-T} from the final WLS step
+  // Unscaled covariance (X'WX)^{-1} = D^{-1} R^{-1} R^{-T} D^{-1} from the
+  // final WLS step
   arma::mat Rinv = arma::inv(arma::trimatu(R));
+  Rinv.each_col() /= colnorm.t();
   arma::mat cov_unscaled = Rinv * Rinv.t();
 
   arma::mat tc(trace_coef.size(), p);

@@ -90,3 +90,15 @@ test_that("nobs() ignores grouped binomial rows with zero trials", {
   expect_equal(nobs(fs_glm(cbind(s, f) ~ x, binomial, d)),
                nobs(glm(cbind(s, f) ~ x, binomial, d)))
 })
+
+test_that("predict() with incomplete newdata returns NA rows and keeps offsets aligned", {
+  d <- sim_data()
+  nd <- data.frame(x1 = c(1, NA, 3), exposure = c(1, 2, 4))
+  for (off in c(TRUE, FALSE)) {
+    g <- if (off) glm(yp ~ x1, poisson, d, offset = log(exposure)) else glm(yp ~ x1, poisson, d)
+    f <- if (off) fs_glm(yp ~ x1, poisson, d, offset = log(exposure)) else fs_glm(yp ~ x1, poisson, d)
+    expect_equal(predict(f, nd), predict(g, nd), tolerance = 1e-8)
+    expect_equal(predict(f, nd, se.fit = TRUE)$se.fit, predict(g, nd, se.fit = TRUE)$se.fit,
+                 tolerance = 1e-8)
+  }
+})

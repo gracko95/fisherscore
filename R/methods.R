@@ -142,7 +142,9 @@ predict.fs_glm <- function(object, newdata = NULL, type = c("link", "response"),
     offset <- object$offset
   } else {
     tt <- stats::delete.response(object$terms)
-    mf <- stats::model.frame(tt, newdata, xlev = object$xlevels)
+    # na.pass keeps every row of newdata (incomplete ones predict NA), so an
+    # offset evaluated in newdata stays aligned, as in predict.lm()
+    mf <- stats::model.frame(tt, newdata, na.action = stats::na.pass, xlev = object$xlevels)
     X <- stats::model.matrix(tt, mf, contrasts.arg = object$contrasts)
     # Offsets from the formula are in the model frame; an `offset =` argument
     # is re-evaluated in newdata, as predict.lm() does.
