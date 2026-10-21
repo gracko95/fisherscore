@@ -20,18 +20,24 @@
 compare_glm <- function(formula, family = gaussian, data, ..., engines = c("R", "cpp"),
                         times = 5) {
   engines <- match.arg(engines, c("R", "cpp"), several.ok = TRUE)
-  med_time <- function(expr_fun) {
-    stats::median(vapply(seq_len(times), function(i) system.time(expr_fun())[["elapsed"]],
+  # Rebuild the call so arguments such as `weights = n` are evaluated in
+  # `data`, exactly as they would be in a direct glm() call.
+  cl <- match.call(expand.dots = TRUE)
+  cl$engines <- cl$times <- NULL
+  env <- parent.frame()
+  med_time <- function(call) {
+    stats::median(vapply(seq_len(times), function(i) system.time(eval(call, env))[["elapsed"]],
                          numeric(1)))
   }
-  fit_glm <- function() stats::glm(formula, family = family, data = data, ...)
-  g <- fit_glm()
+  cl[[1L]] <- quote(stats::glm)
+  g <- eval(cl, env)
   fits <- list(glm = g)
-  t <- c(glm = med_time(fit_glm))
+  t <- c(glm = med_time(cl))
   for (e in engines) {
-    f <- function() fs_glm(formula, family = family, data = data, engine = e, ...)
-    fits[[paste0("fs_", e)]] <- f()
-    t[paste0("fs_", e)] <- med_time(f)
+    cl[[1L]] <- quote(fisherscore::fs_glm)
+    cl$engine <- e
+    fits[[paste0("fs_", e)]] <- eval(cl, env)
+    t[paste0("fs_", e)] <- med_time(cl)
   }
 
   g_coef <- stats::coef(g)
