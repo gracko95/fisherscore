@@ -25,8 +25,19 @@ export(fs_glm)
 export(plot_convergence)
 importFrom(Rcpp,sourceCpp)
 importFrom(stats,
+  anova,
   binomial,
+  coef,
+  confint,
+  deviance,
+  fitted,
+  formula,
   gaussian,
-  poisson
+  logLik,
+  nobs,
+  poisson,
+  predict,
+  residuals,
+  vcov
 )
 useDynLib(fisherscore, .registration = TRUE)

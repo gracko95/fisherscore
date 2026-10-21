@@ -1,0 +1,115 @@
+---
+title: "Comparing fisherscore with glm()"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparing fisherscore with glm()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(fisherscore)
+```
+
+## Side by side
+
+`compare_glm()` fits a model with `stats::glm()` and with both `fs_glm()`
+engines, then reports how far apart they are.
+
+```{r}
+compare_glm(cbind(ncases, ncontrols) ~ agegp + alcgp, binomial, esoph)
+```
+
+`summary()` output is laid out like `summary.glm()`:
+
+```{r}
+fit <- fs_glm(breaks ~ wool + tension, family = poisson, data = warpbreaks, engine = "cpp")
+summary(fit)
+summary(glm(breaks ~ wool + tension, family = poisson, data = warpbreaks))$coefficients
+```
+
+## Accuracy across families, links and data sets
+
+```{r}
+ucb <- as.data.frame(UCBAdmissions)
+men <- MASS::menarche
+set.seed(651)
+sim <- data.frame(x = rnorm(500))
+sim$y <- rbinom(500, 1, 1 - exp(-exp(-0.5 + sim$x)))   # complementary log-log truth
+sim$count <- rpois(500, (2 + 0.5 * sim$x)^2)
+
+models <- list(
+  "esoph, logit"            = list(cbind(ncases, ncontrols) ~ agegp + alcgp + tobgp, binomial(), esoph),
+  "menarche, probit"        = list(cbind(Menarche, Total - Menarche) ~ Age, binomial("probit"), men),
+  "simulated, cloglog"      = list(y ~ x, binomial("cloglog"), sim),
+  "warpbreaks, log"         = list(breaks ~ wool * tension, poisson(), warpbreaks),
+  "UCBAdmissions loglinear" = list(Freq ~ (Admit + Gender + Dept)^2, poisson(), ucb),
+  "simulated, sqrt"         = list(count ~ x, poisson("sqrt"), sim, start = c(2, 0.5)),
+  "mtcars, gaussian"        = list(mpg ~ wt + hp + factor(cyl), gaussian(), mtcars)
+)
+
+tab <- do.call(rbind, lapply(names(models), function(nm) {
+  m <- models[[nm]]
+  cmp <- do.call(compare_glm, c(m, times = 1))
+  s <- cmp$summary
+  data.frame(model = nm,
+             iter_glm = s$iterations[1], iter_fs = s$iterations[3],
+             max_coef_diff_R = s$max_coef_diff[2], max_coef_diff_cpp = s$max_coef_diff[3],
+             max_se_diff_cpp = s$max_se_diff[3],
+             dev_diff_cpp = abs(s$deviance[3] - s$deviance[1]))
+}))
+knitr::kable(tab, digits = 20, format.args = list(digits = 2))
+```
+
+The sqrt-link model is given starting values. Without them, `glm()` and
+`fs_glm()` both stop with *"no valid set of coefficients has been found"*,
+because the first Fisher scoring step makes some $\eta_i < 0$, which is
+invalid for $\mu = \eta^2$, and there is no earlier iterate to halve back
+towards:
+
+```{r}
+try(glm(count ~ x, poisson("sqrt"), sim))
+try(fs_glm(count ~ x, poisson("sqrt"), sim))
+```
+
+The pure-R engine reproduces `glm()` exactly: both build the same working
+weights, run the same LINPACK QR, and follow the same stopping rule. The C++
+engine uses LAPACK's Householder QR, so it differs by only a few units of
+machine precision ($\approx 10^{-15}$). Both engines take the same number of
+iterations as `glm()`.
+
+## Speed
+
+The script `inst/benchmarks/benchmark.R` times all three methods for
+$n$ from $10^3$ to $10^6$ and $p \in \{5, 50\}$. Results saved by the script:
+
+```{r}
+res_file <- system.file("benchmarks", "results.csv", package = "fisherscore")
+if (nzchar(res_file)) {
+  res <- read.csv(res_file)
+  wide <- reshape(res[, c("family", "n", "p", "method", "median_sec")],
+                  idvar = c("family", "n", "p"), timevar = "method", direction = "wide")
+  names(wide) <- sub("median_sec.", "", names(wide), fixed = TRUE)
+  wide$speedup_cpp_vs_glm <- wide$glm / wide$fs_cpp
+  knitr::kable(wide, digits = 3, row.names = FALSE)
+}
+```
+
+```{r, echo = FALSE, out.width = "100%"}
+png_file <- system.file("benchmarks", "benchmark.png", package = "fisherscore")
+if (nzchar(png_file)) knitr::include_graphics(png_file)
+```
+
+Most of `fs_glm()`'s time outside the engine goes on building the model
+matrix, which `glm()` also does. The `time` element of a fit isolates the
+Fisher scoring loop itself:
+
+```{r}
+set.seed(1)
+n <- 2e5
+d <- data.frame(x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n))
+d$y <- rbinom(n, 1, plogis(-1 + d$x1 - 0.5 * d$x2))
+c(R = fs_glm(y ~ ., binomial, d, engine = "R")$time,
+  cpp = fs_glm(y ~ ., binomial, d, engine = "cpp")$time)
+```
