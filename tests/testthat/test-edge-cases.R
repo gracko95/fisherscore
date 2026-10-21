@@ -37,3 +37,38 @@ test_that("user-supplied starting values are honoured", {
   expect_equal(coef(f), coef(g), tolerance = 1e-8)
   expect_error(fs_glm(yp ~ x1, poisson, d, start = 1), "length of 'start'")
 })
+
+test_that("nearly collinear predictors are kept, as glm keeps them", {
+  d <- sim_data()
+  set.seed(1)
+  d$z <- d$x1 + 1e-8 * rnorm(nrow(d))
+  g <- glm(yg ~ x1 + z, gaussian, d)
+  for (e in c("R", "cpp")) {
+    f <- fs_glm(yg ~ x1 + z, gaussian, d, engine = e)
+    expect_equal(f$rank, g$rank)
+    expect_length(f$aliased, 0)
+    expect_equal(coef(f), coef(g), tolerance = 1e-4)
+  }
+})
+
+test_that("singularity checks do not depend on predictor units", {
+  d <- sim_data()
+  d$x_small <- d$x1 * 1e-8
+  expect_matches_glm(yp ~ x_small + x2, poisson, d)
+})
+
+test_that("empty models fit with eta = offset, as in glm", {
+  d <- sim_data()
+  for (e in c("R", "cpp")) {
+    g <- glm(yp ~ 0, poisson, d)
+    f <- fs_glm(yp ~ 0, poisson, d, engine = e)
+    expect_length(coef(f), 0)
+    expect_equal(deviance(f), deviance(g))
+    expect_equal(AIC(f), AIC(g))
+    expect_equal(f$df.residual, g$df.residual)
+    expect_equal(f$iter, 0L)
+    g <- glm(yp ~ 0 + offset(log(exposure)), poisson, d)
+    f <- fs_glm(yp ~ 0 + offset(log(exposure)), poisson, d, engine = e)
+    expect_equal(unname(fitted(f)), unname(fitted(g)))
+  }
+})

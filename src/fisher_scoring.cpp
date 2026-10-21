@@ -163,8 +163,14 @@ List fs_fit_cpp(const arma::mat& X, const arma::vec& y, const arma::vec& weights
     Xw = X.each_col() % sw;
     arma::mat Q;
     if (!arma::qr_econ(Q, R, Xw)) stop("QR decomposition failed at iteration %d", iter);
-    if (arma::min(arma::abs(R.diag())) < 1e-7 * arma::max(arma::abs(R.diag())))
-      stop("X'WX is singular at iteration %d", iter);
+    // Column j is (numerically) dependent on the earlier ones when |R_jj|, the
+    // norm of the part of column j orthogonal to them, is tiny relative to the
+    // column's own norm. This is unaffected by rescaling a column, and uses the
+    // same tolerance as fs_fit_r().
+    arma::rowvec colnorm = arma::sqrt(arma::sum(arma::square(Xw), 0));
+    for (arma::uword j = 0; j < p; ++j)
+      if (!(std::fabs(R(j, j)) > std::min(1e-7, epsilon / 1000.0) * colnorm[j]))
+        stop("X'WX is singular at iteration %d", iter);
     beta = arma::solve(arma::trimatu(R), Q.t() * (z % sw));
 
     // 3. New linear predictor, mean and deviance

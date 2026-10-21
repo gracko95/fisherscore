@@ -31,7 +31,8 @@ summary.fs_glm <- function(object, dispersion = NULL, ...) {
   est <- object$coefficients[!is.na(object$coefficients)]
   se <- sqrt(diag(object$cov.unscaled) * disp)
   stat <- est / se
-  if (object$family$fixed_dispersion) {
+  # As in summary.glm(): t tests only when the dispersion is estimated
+  if (object$family$fixed_dispersion || !is.null(dispersion)) {
     p <- 2 * stats::pnorm(-abs(stat))
     cn <- c("Estimate", "Std. Error", "z value", "Pr(>|z|)")
   } else {
@@ -56,7 +57,7 @@ summary.fs_glm <- function(object, dispersion = NULL, ...) {
 print.summary.fs_glm <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
   cat("\nCall:\n", paste(deparse(x$call), sep = "\n", collapse = "\n"), "\n\n", sep = "")
   cat("Deviance Residuals:\n")
-  print(stats::setNames(stats::quantile(x$deviance.resid),
+  print(stats::setNames(stats::quantile(x$deviance.resid, na.rm = TRUE),
                         c("Min", "1Q", "Median", "3Q", "Max")), digits = digits)
   if (length(x$aliased))
     cat("\nCoefficients: (", length(x$aliased),
@@ -85,7 +86,7 @@ vcov.fs_glm <- function(object, ...) object$cov.unscaled * object$dispersion
 
 #' @rdname fs_glm-methods
 #' @export
-fitted.fs_glm <- function(object, ...) object$fitted.values
+fitted.fs_glm <- function(object, ...) stats::napredict(object$na.action, object$fitted.values)
 
 #' @rdname fs_glm-methods
 #' @export
@@ -93,7 +94,7 @@ deviance.fs_glm <- function(object, ...) object$deviance
 
 #' @rdname fs_glm-methods
 #' @export
-nobs.fs_glm <- function(object, ...) sum(object$prior.weights != 0)
+nobs.fs_glm <- function(object, ...) sum(object$weights != 0)
 
 #' @rdname fs_glm-methods
 #' @export
@@ -110,11 +111,12 @@ residuals.fs_glm <- function(object, type = c("deviance", "pearson", "working", 
   mu <- object$fitted.values
   wt <- object$weights
   fam <- object$family
-  switch(type,
+  res <- switch(type,
     deviance = sign(y - mu) * sqrt(pmax(fam$dev.resids(y, mu, wt), 0)),
     pearson = (y - mu) * sqrt(wt) / sqrt(fam$variance(mu)),
     working = object$residuals,
     response = y - mu)
+  stats::naresid(object$na.action, res)
 }
 
 #' @rdname fs_glm-methods
@@ -142,16 +144,22 @@ predict.fs_glm <- function(object, newdata = NULL, type = c("link", "response"),
     tt <- stats::delete.response(object$terms)
     mf <- stats::model.frame(tt, newdata, xlev = object$xlevels)
     X <- stats::model.matrix(tt, mf, contrasts.arg = object$contrasts)
+    # Offsets from the formula are in the model frame; an `offset =` argument
+    # is re-evaluated in newdata, as predict.lm() does.
     offset <- stats::model.offset(mf)
     if (is.null(offset)) offset <- rep.int(0, nrow(X))
+    if (!is.null(object$call$offset))
+      offset <- offset + eval(object$call$offset, newdata, environment(object$terms))
   }
   X <- X[, keep, drop = FALSE]
   eta <- drop(X %*% beta[keep]) + offset
   fit <- if (type == "link") eta else object$family$linkinv(eta)
-  if (!se.fit) return(fit)
+  # Pad rows dropped by na.exclude back in, only when predicting for the fit data
+  pad <- function(v) if (is.null(newdata)) stats::napredict(object$na.action, v) else v
+  if (!se.fit) return(pad(fit))
   se <- sqrt(rowSums((X %*% stats::vcov(object)) * X))
   if (type == "response") se <- se * abs(object$family$mu.eta(eta))
-  list(fit = fit, se.fit = se, residual.scale = sqrt(object$dispersion))
+  list(fit = pad(fit), se.fit = pad(se), residual.scale = sqrt(object$dispersion))
 }
 
 #' @rdname fs_glm-methods

@@ -52,3 +52,41 @@ test_that("plot_convergence returns the trace", {
   tr <- plot_convergence(f, "change")
   expect_equal(nrow(tr), f$iter)
 })
+
+test_that("predict() with newdata re-evaluates an offset argument", {
+  d <- sim_data()
+  g <- glm(yp ~ x1, poisson, d, offset = log(exposure))
+  f <- fs_glm(yp ~ x1, poisson, d, offset = log(exposure))
+  expect_equal(predict(f, d), predict(f))
+  nd <- d[1:5, ]
+  nd$exposure <- nd$exposure * 2
+  expect_equal(unname(predict(f, nd, type = "response")),
+               unname(predict(g, nd, type = "response")), tolerance = 1e-8)
+})
+
+test_that("a supplied dispersion gives z tests, as in summary.glm", {
+  d <- sim_data()[1:10, ]
+  g <- summary(glm(yg ~ x1, gaussian, d), dispersion = 1)$coefficients
+  f <- summary(fs_glm(yg ~ x1, gaussian, d), dispersion = 1)$coefficients
+  expect_equal(colnames(f), colnames(g))
+  expect_equal(f, g, tolerance = 1e-8)
+})
+
+test_that("na.exclude pads fitted values, residuals and predictions with NA", {
+  d <- data.frame(x = c(1, 2, NA, 4, 5, 6), y = c(1, 3, 2, 5, 4, 8))
+  g <- glm(y ~ x, poisson, d, na.action = na.exclude)
+  f <- fs_glm(y ~ x, poisson, d, na.action = na.exclude)
+  expect_equal(fitted(f), fitted(g), tolerance = 1e-8)
+  expect_equal(residuals(f), residuals(g), tolerance = 1e-8)
+  expect_equal(residuals(f, "pearson"), residuals(g, "pearson"), tolerance = 1e-8)
+  expect_equal(predict(f), predict(g), tolerance = 1e-8)
+  expect_equal(predict(f, se.fit = TRUE)$se.fit, predict(g, se.fit = TRUE)$se.fit,
+               tolerance = 1e-8)
+  expect_output(print(summary(f)))
+})
+
+test_that("nobs() ignores grouped binomial rows with zero trials", {
+  d <- data.frame(s = c(2, 0, 3, 1), f = c(3, 0, 2, 4), x = 1:4)
+  expect_equal(nobs(fs_glm(cbind(s, f) ~ x, binomial, d)),
+               nobs(glm(cbind(s, f) ~ x, binomial, d)))
+})

@@ -75,8 +75,10 @@ fs_glm <- function(formula, family = gaussian, data, weights, subset,
   else names(y) <- rownames(mf)
 
   # ---- aliased (linearly dependent) columns get NA coefficients ----------
+  # Same tolerance as the engines' (and glm.fit's) QR, so columns are not
+  # dropped here that glm() would keep.
   good <- weights > 0
-  qx <- qr(X[good, , drop = FALSE])
+  qx <- qr(X[good, , drop = FALSE], tol = min(1e-7, control$epsilon / 1000))
   keep <- sort(qx$pivot[seq_len(qx$rank)])
   aliased <- setdiff(seq_len(ncol(X)), keep)
   Xk <- X[, keep, drop = FALSE]
@@ -90,9 +92,15 @@ fs_glm <- function(formula, family = gaussian, data, weights, subset,
   eta_start <- if (!is.null(start)) drop(Xk %*% start) + offset else fam$linkfun(r$mustart)
 
   # ---- run the chosen engine on the rows with positive weight -------------
+  # An empty model (no estimable coefficients) has eta = offset and needs no
+  # iterations, as in glm.fit().
   timing <- system.time(
-    fit <- fs_engine(engine, Xk[good, , drop = FALSE], y[good], weights[good],
-                     offset[good], fam, control, eta_start[good], start)
+    fit <- if (ncol(Xk) == 0L) {
+      fs_empty_fit(y[good], weights[good], offset[good], fam)
+    } else {
+      fs_engine(engine, Xk[good, , drop = FALSE], y[good], weights[good],
+                offset[good], fam, control, eta_start[good], start)
+    }
   )[["elapsed"]]
   if (!fit$converged) warning("fs_glm: algorithm did not converge", call. = FALSE)
   if (fit$boundary) warning("fs_glm: algorithm stopped at boundary value", call. = FALSE)
@@ -145,6 +153,7 @@ fs_glm <- function(formula, family = gaussian, data, weights, subset,
     aliased = colnames(X)[aliased],
     family = fam, engine = engine, time = timing, control = control,
     trace = fit$trace, call = call, formula = formula, terms = mt,
+    na.action = attr(mf, "na.action"),
     xlevels = stats::.getXlevels(mt, mf), contrasts = attr(X, "contrasts"),
     model = if (model) mf
   ), class = "fs_glm")
@@ -163,6 +172,19 @@ fs_engine <- function(engine, X, y, weights, offset, fam, control, eta_start, st
     colnames(fit$trace$coefficients) <- colnames(X)
     fit
   }
+}
+
+# Result of fitting a model with no coefficients: eta is just the offset.
+fs_empty_fit <- function(y, weights, offset, fam) {
+  eta <- offset
+  mu <- fam$linkinv(eta)
+  if (!(fam$valideta(eta) && fam$validmu(mu)))
+    stop("invalid linear predictor values in empty model", call. = FALSE)
+  dev <- sum(fam$dev.resids(y, mu, weights))
+  list(coefficients = numeric(0), linear.predictors = eta, fitted.values = mu,
+       deviance = dev, iter = 0L, converged = TRUE, boundary = FALSE,
+       cov.unscaled = matrix(numeric(0), 0, 0),
+       trace = list(deviance = numeric(0), coefficients = matrix(numeric(0), 0, 0)))
 }
 
 # Turn the raw response into (y, weights, n, mustart), as each family's
