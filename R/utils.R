@@ -58,9 +58,21 @@ xwx_inverse <- function(X, w) {
 check_counts <- function(y) {
   if (!is.numeric(y) || !is.null(dim(y)))
     stop("the response must be a numeric vector of counts", call. = FALSE)
+  if (any(!is.finite(y)))
+    stop("the response contains non-finite values (NaN or Inf)", call. = FALSE)
   if (any(y < 0) || any(abs(y - round(y)) > 1e-8))
     stop("the response must contain non-negative integer counts", call. = FALSE)
+  if (all(y == 0))
+    stop("all responses are zero: the coefficients have no finite maximum likelihood ",
+         "estimate and theta is not identified", call. = FALSE)
   invisible(y)
+}
+
+# A single positive, finite number (for control parameters)
+check_positive <- function(x, name, min = 0) {
+  if (!is.numeric(x) || length(x) != 1 || !is.finite(x) || x <= min)
+    stop(sprintf("'%s' must be a single finite number > %g", name, min), call. = FALSE)
+  invisible(x)
 }
 
 check_full_rank <- function(X, what = "model matrix") {

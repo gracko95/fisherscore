@@ -17,14 +17,11 @@
 #' @export
 nbreg_control <- function(tol = 1e-8, maxit = 100, inner_tol = 1e-10, inner_maxit = 100,
                           theta_max = 1e5, trace = FALSE) {
-  if (!is.numeric(tol) || length(tol) != 1 || tol <= 0) stop("'tol' must be a positive number", call. = FALSE)
-  if (!is.numeric(inner_tol) || length(inner_tol) != 1 || inner_tol <= 0)
-    stop("'inner_tol' must be a positive number", call. = FALSE)
-  if (!is.numeric(maxit) || length(maxit) != 1 || maxit < 1) stop("'maxit' must be >= 1", call. = FALSE)
-  if (!is.numeric(inner_maxit) || length(inner_maxit) != 1 || inner_maxit < 1)
-    stop("'inner_maxit' must be >= 1", call. = FALSE)
-  if (!is.numeric(theta_max) || length(theta_max) != 1 || theta_max <= 0)
-    stop("'theta_max' must be a positive number", call. = FALSE)
+  check_positive(tol, "tol")
+  check_positive(inner_tol, "inner_tol")
+  check_positive(maxit, "maxit", min = 0.5)        # i.e. maxit >= 1
+  check_positive(inner_maxit, "inner_maxit", min = 0.5)
+  check_positive(theta_max, "theta_max")
   list(tol = tol, maxit = as.integer(maxit), inner_tol = inner_tol,
        inner_maxit = as.integer(inner_maxit), theta_max = theta_max, trace = isTRUE(trace))
 }
@@ -157,6 +154,9 @@ nb_fit <- function(X, y, offset, a, control, beta = NULL, theta = NULL, warn = T
   if (warn && !converged)
     warning(sprintf("nbreg: no convergence after maxit = %d iterations", control$maxit),
             call. = FALSE)
+  if (warn && any(a > 0 & mu < 1e-10))
+    warning(paste0("nbreg: fitted means numerically 0 occurred; some coefficients may be ",
+                   "infinite (e.g. a covariate pattern with only zero counts)"), call. = FALSE)
   if (warn && theta_at_max)
     warning(sprintf(paste0("nbreg: theta reached theta_max = %g (Poisson limit); ",
                            "the data show little or no overdispersion"), control$theta_max),
@@ -198,7 +198,13 @@ nb_irls_beta <- function(X, y, offset, a, theta, beta, control) {
   for (it in seq_len(control$inner_maxit)) {
     w <- if (is.infinite(theta)) a * mu else a * theta * mu / (theta + mu)
     z <- (eta - offset) + (y - mu) / mu
-    beta_new <- wls(X, z, w)
+    # If mu_i underflows to 0 the weights vanish and X'WX becomes singular:
+    # some coefficient is heading to -Inf (a covariate pattern with only zeros).
+    beta_new <- tryCatch(wls(X, z, w), error = function(e) NULL)
+    if (is.null(beta_new) || any(!is.finite(beta_new)))
+      stop(paste0("IRLS failed: fitted means reached 0, so some coefficients have no finite ",
+                  "estimate (e.g. a factor level or covariate pattern with only zero counts)"),
+           call. = FALSE)
 
     eta_new <- drop(X %*% beta_new + offset)
     ll_new <- nb_loglik(y, exp(eta_new), theta, a)

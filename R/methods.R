@@ -295,15 +295,22 @@ predict.zinbreg <- function(object, newdata = NULL,
     mu <- object$mu
     pi <- object$pi
   } else {
-    ttX <- stats::delete.response(object$terms$count)
-    mfX <- stats::model.frame(ttX, newdata, na.action = stats::na.pass,
-                              xlev = object$xlevels$count)
-    X <- stats::model.matrix(ttX, mfX, contrasts.arg = object$contrasts$count)
-    mu <- exp(drop(X %*% object$coefficients$count) + new_offset(mfX, object$call, newdata, ttX))
-    ttZ <- object$terms$zero
-    mfZ <- stats::model.frame(ttZ, newdata, na.action = stats::na.pass,
-                              xlev = object$xlevels$zero)
-    Z <- stats::model.matrix(ttZ, mfZ, contrasts.arg = object$contrasts$zero)
+    # Build one model frame for both parts from the terms of the fitted model
+    # frame: their "predvars" keep data-dependent transformations such as
+    # poly() or scale() at their training values. Then take each part's
+    # columns from it, exactly as zinbreg() does when fitting.
+    tt <- stats::delete.response(object$terms$full)
+    mf <- stats::model.frame(tt, newdata, na.action = stats::na.pass,
+                             xlev = c(object$xlevels$count, object$xlevels$zero))
+    X <- stats::model.matrix(stats::delete.response(object$terms$count), mf,
+                             contrasts.arg = object$contrasts$count)
+    Z <- stats::model.matrix(object$terms$zero, mf, contrasts.arg = object$contrasts$zero)
+    off <- stats::model.offset(Formula::model.part(object$formula, data = mf, lhs = 0L,
+                                                   rhs = 1L, terms = TRUE))
+    if (is.null(off)) off <- rep(0, nrow(X))
+    if (!is.null(object$call$offset))
+      off <- off + eval(object$call$offset, newdata, environment(object$terms$full))
+    mu <- exp(drop(X %*% object$coefficients$count) + off)
     pi <- stats::plogis(drop(Z %*% object$coefficients$zero))
   }
   switch(type,

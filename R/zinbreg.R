@@ -277,7 +277,13 @@ logit_irls <- function(Z, t, gamma, control) {
     p <- stats::plogis(eta)
     w <- p * (1 - p)
     z <- eta + (t - p) / w
-    gamma_new <- wls(Z, z, w)
+    # If pi_i reaches 0 or 1 the weights vanish and Z'WZ becomes singular: the
+    # zero-model covariates (nearly) separate structural zeros from counts.
+    gamma_new <- tryCatch(wls(Z, z, w), error = function(e) NULL)
+    if (is.null(gamma_new) || any(!is.finite(gamma_new)))
+      stop(paste0("the zero-model IRLS failed: the zero-model covariates (nearly) perfectly ",
+                  "separate zeros from positive counts, so the zero-inflation coefficients ",
+                  "have no finite estimate. Simplify the zero model (after |)."), call. = FALSE)
 
     eta_new <- drop(Z %*% gamma_new)
     q_new <- q_fun(eta_new)

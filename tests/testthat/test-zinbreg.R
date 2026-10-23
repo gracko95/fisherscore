@@ -138,3 +138,27 @@ test_that("zinbreg warns when EM hits maxit", {
   expect_warning(fit <- zinbreg(y ~ x | z, d, control = zinbreg_control(maxit = 2)), "maxit")
   expect_false(fit$converged)
 })
+
+test_that("predict() on training subsets reproduces fitted values with poly() and factors", {
+  set.seed(29)
+  n <- 400
+  d <- data.frame(x = runif(n, 0, 3), z = rnorm(n), f = gl(2, n / 2))
+  d$y <- ifelse(rbinom(n, 1, plogis(-1 + d$z)) == 1, 0,
+                rnbinom(n, size = 2, mu = exp(0.5 + 0.8 * d$x - 0.2 * d$x^2)))
+  fit <- zinbreg(y ~ poly(x, 2) + f | poly(z, 2), d)
+  rows <- c(1:5, 396:400)
+  expect_equal(predict(fit, newdata = d[rows, ]), fitted(fit)[rows], ignore_attr = TRUE)
+  expect_equal(predict(fit, newdata = d[rows, ], type = "count"), fit$mu[rows],
+               ignore_attr = TRUE)
+  expect_equal(predict(fit, newdata = d[rows, ], type = "zero"), fit$pi[rows],
+               ignore_attr = TRUE)
+})
+
+test_that("zinbreg gives clear errors for boundary data", {
+  expect_error(zinbreg(y ~ 1, data.frame(y = rep(0, 10))), "all responses are zero")
+  expect_error(zinbreg(y ~ 1, data.frame(y = c(0, Inf, 2))), "non-finite")
+  # zeros exactly when z < 0: complete separation in the zero model
+  d <- data.frame(z = c(-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2, 1, 2), x = seq(-1, 1, length = 10))
+  d$y <- ifelse(d$z < 0, 0, c(1, 2, 3, 1, 2, 4))
+  expect_error(zinbreg(y ~ x | z, d), "separate zeros")
+})

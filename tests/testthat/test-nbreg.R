@@ -94,7 +94,7 @@ test_that("nbreg gives informative errors for bad input", {
   expect_error(nbreg(I(y + 0.5) ~ x, d), "non-negative integer")
   expect_error(nbreg(y ~ x + I(2 * x), d), "rank deficient")
   expect_error(nbreg(y ~ x, d, offset = rep(0, 3)), "")
-  expect_error(nbreg_control(tol = -1), "positive")
+  expect_error(nbreg_control(tol = -1), "finite number > 0")
   expect_error(nbreg_control(maxit = 0), "maxit")
 })
 
@@ -115,4 +115,25 @@ test_that("trace prints the log-likelihood", {
   d <- data.frame(x = rnorm(100))
   d$y <- rnbinom(100, size = 2, mu = exp(1 + 0.5 * d$x))
   expect_output(nbreg(y ~ x, d, control = nbreg_control(trace = TRUE)), "logLik")
+})
+
+test_that("nbreg rejects data with no finite MLE and non-finite input", {
+  expect_error(nbreg(y ~ 1, data.frame(y = rep(0, 10))), "all responses are zero")
+  expect_error(nbreg(y ~ 1, data.frame(y = c(1, Inf, 2))), "non-finite")
+  expect_error(nbreg_control(tol = Inf), "finite")
+  expect_error(nbreg_control(maxit = NA_real_), "finite")
+  # a factor level with only zero counts: the coefficient goes to -Inf
+  set.seed(16)
+  d <- data.frame(g = gl(2, 20))
+  d$y <- c(rep(0, 20), rnbinom(20, size = 2, mu = 3))
+  expect_error(nbreg(y ~ g, d), "no finite")
+})
+
+test_that("predict() on training rows reproduces fitted values with poly()", {
+  set.seed(17)
+  d <- data.frame(x = runif(300, 0, 3))
+  d$y <- rnbinom(300, size = 2, mu = exp(0.5 + 0.8 * d$x - 0.2 * d$x^2))
+  fit <- nbreg(y ~ poly(x, 2), d)
+  expect_equal(predict(fit, newdata = d[1:10, , drop = FALSE]), fitted(fit)[1:10],
+               ignore_attr = TRUE)
 })
