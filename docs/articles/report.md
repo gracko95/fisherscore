@@ -167,10 +167,10 @@ higher maximum.
 
 | Fit               |    Coef |      SE |   theta |   logLik | Iter | Time (ours) | Time (ref.) |
 |:------------------|--------:|--------:|--------:|---------:|-----:|------------:|------------:|
-| NB, bioChemists   | 2.1e-08 | 9.8e-10 | 6.7e-08 |  4.5e-13 |    4 |       0.016 |       0.018 |
+| NB, bioChemists   | 2.1e-08 | 9.8e-10 | 6.7e-08 |  4.5e-13 |    4 |       0.015 |       0.018 |
 | NB, NMES1988      | 4.7e-08 | 9.2e-10 | 4.3e-08 |  7.1e-11 |    3 |       0.076 |       0.064 |
-| ZINB, bioChemists | 1.5e-04 | 9.4e-05 | 1.3e-05 | -4.2e-08 |  111 |       1.065 |       0.041 |
-| ZINB, NMES1988    | 2.6e-05 | 1.7e-05 | 4.4e-06 | -1.6e-08 |   53 |       3.034 |       0.197 |
+| ZINB, bioChemists | 1.5e-04 | 9.4e-05 | 1.3e-05 | -4.2e-08 |  111 |       1.076 |       0.042 |
+| ZINB, NMES1988    | 2.6e-05 | 1.7e-05 | 4.4e-06 | -1.6e-08 |   53 |       3.023 |       0.196 |
 
 Table 1: Maximum absolute differences from the reference
 implementations, iterations of our algorithm (outer NB iterations or EM
@@ -198,10 +198,11 @@ is log(theta).
 Table 2: ZINB estimates and standard errors for NMES1988: zinbreg()
 versus zeroinfl().
 
-The side-by-side tables for the other three fits are produced by
-`inst/benchmark/benchmark.R` and look the same. EM needs more iterations
-than BFGS and is slower (each M-step is itself an iterative fit), but
-every run converged and the log-likelihood never decreased.
+The side-by-side tables for the other three fits are in the Appendix
+([Table 7](#tbl-app-nb-bio), [Table 8](#tbl-app-nb-nmes) and
+[Table 9](#tbl-app-zinb-bio)). EM needs more iterations than BFGS and is
+slower (each M-step is itself an iterative fit), but every run converged
+and the log-likelihood never decreased.
 
 # 5 Simulation study
 
@@ -344,3 +345,52 @@ corrected or rejected.
 - Wickham, H. and Bryan, J. (2023). *R Packages* (2nd ed.). O’Reilly.
 - Zeileis, A., Kleiber, C. and Jackman, S. (2008). Regression models for
   count data in R. *Journal of Statistical Software*, 27(8), 1–25.
+
+# Appendix: side-by-side benchmark estimates
+
+| Term        |     nbreg |    glm.nb | SE nbreg | SE glm.nb |
+|:------------|----------:|----------:|---------:|----------:|
+| (Intercept) |  0.256144 |  0.256144 | 0.137348 |  0.137348 |
+| femWomen    | -0.216418 | -0.216418 | 0.072636 |  0.072636 |
+| marMarried  |  0.150489 |  0.150489 | 0.082097 |  0.082097 |
+| kid5        | -0.176415 | -0.176415 | 0.052813 |  0.052813 |
+| phd         |  0.015271 |  0.015271 | 0.035873 |  0.035873 |
+| ment        |  0.029082 |  0.029082 | 0.003214 |  0.003214 |
+| theta       |  2.264388 |  2.264388 | 0.271176 |  0.271175 |
+
+Table 7: NB estimates and standard errors for bioChemists: nbreg()
+versus glm.nb().
+
+| Term            |     nbreg |    glm.nb | SE nbreg | SE glm.nb |
+|:----------------|----------:|----------:|---------:|----------:|
+| (Intercept)     |  0.929257 |  0.929257 | 0.054591 |  0.054591 |
+| hospital        |  0.217772 |  0.217772 | 0.020176 |  0.020176 |
+| healthpoor      |  0.305013 |  0.305013 | 0.048511 |  0.048511 |
+| healthexcellent | -0.341807 | -0.341807 | 0.060924 |  0.060924 |
+| chronic         |  0.174916 |  0.174916 | 0.012092 |  0.012092 |
+| gendermale      | -0.126488 | -0.126488 | 0.031216 |  0.031216 |
+| school          |  0.026815 |  0.026815 | 0.004394 |  0.004394 |
+| insuranceyes    |  0.224402 |  0.224402 | 0.039464 |  0.039464 |
+| theta           |  1.206603 |  1.206604 | 0.033555 |  0.033555 |
+
+Table 8: NB estimates and standard errors for NMES1988: nbreg() versus
+glm.nb().
+
+| Term               |  zinbreg | zeroinfl | SE zinbreg | SE zeroinfl |
+|:-------------------|---------:|---------:|-----------:|------------:|
+| count\_(Intercept) |  0.41675 |  0.41675 |    0.14360 |     0.14360 |
+| count_femWomen     | -0.19550 | -0.19551 |    0.07559 |     0.07559 |
+| count_marMarried   |  0.09758 |  0.09758 |    0.08445 |     0.08445 |
+| count_kid5         | -0.15173 | -0.15173 |    0.05421 |     0.05421 |
+| count_phd          | -0.00070 | -0.00070 |    0.03627 |     0.03627 |
+| count_ment         |  0.02479 |  0.02479 |    0.00349 |     0.00349 |
+| zero\_(Intercept)  | -0.19184 | -0.19169 |    1.32272 |     1.32282 |
+| zero_femWomen      |  0.63595 |  0.63593 |    0.84885 |     0.84892 |
+| zero_marMarried    | -1.49932 | -1.49947 |    0.93859 |     0.93867 |
+| zero_kid5          |  0.62841 |  0.62843 |    0.44276 |     0.44278 |
+| zero_phd           | -0.03768 | -0.03771 |    0.30799 |     0.30801 |
+| zero_ment          | -0.88222 | -0.88229 |    0.31619 |     0.31623 |
+| log(theta)         |  0.97637 |  0.97636 |    0.13547 |     0.13547 |
+
+Table 9: ZINB estimates and standard errors for bioChemists: zinbreg()
+versus zeroinfl().

@@ -12,3 +12,4 @@ vignettes/articles/report_files/
 vignettes/articles/report.tex
 vignettes/articles/*.pdf
 vignettes/articles/*.html
+vignettes/articles/report_cache/

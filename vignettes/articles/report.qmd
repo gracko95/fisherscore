@@ -27,6 +27,13 @@ data("bioChemists", package = "pscl")
 knitr::opts_chunk$set(fig.align = "center")
 kable <- function(x, ...) knitr::kable(x, booktabs = TRUE, ...)
 sci <- function(x) formatC(x, format = "e", digits = 1)
+# Fingerprint of the installed package's code: the cached simulation chunk
+# below is re-run whenever this changes, so results can never go stale.
+ns <- asNamespace("nbzinbKoo")
+code_file <- tempfile()
+writeLines(unlist(lapply(sort(ls(ns, all.names = TRUE)), function(f) deparse(get(f, ns)))),
+           code_file)
+pkg_code_hash <- unname(tools::md5sum(code_file))
 ```
 
 <!--
@@ -246,15 +253,24 @@ kable(out, align = "lrrrrrrr")
 kable(b$`ZINB, NMES1988`$table, digits = 5)
 ```
 
-The side-by-side tables for the other three fits are produced by
-`inst/benchmark/benchmark.R` and look the same. EM needs more iterations
+The side-by-side tables for the other three fits are in the Appendix
+(@tbl-app-nb-bio, @tbl-app-nb-nmes and @tbl-app-zinb-bio). EM needs more iterations
 than BFGS and is slower (each M-step is itself an iterative fit), but every
 run converged and the log-likelihood never decreased.
 
 # Simulation study
 
 ```{r sim}
-sim <- readRDS(system.file("benchmark", "simulation_results.rds", package = "nbzinbKoo"))
+#| cache: true
+#| cache.extra: !expr pkg_code_hash
+#| results: hide
+# Runs inst/benchmark/simulation.R (installed with the package); takes ~1-2 min
+sim_env <- new.env()
+sys.source(system.file("benchmark", "simulation.R", package = "nbzinbKoo"), envir = sim_env)
+sim <- sim_env$results
+```
+
+```{r sim-settings}
 s <- sim$settings
 ```
 
@@ -405,3 +421,23 @@ or rejected.
 * Venables, W. N. and Ripley, B. D. (2002). *Modern Applied Statistics with S* (4th ed.). Springer.
 * Wickham, H. and Bryan, J. (2023). *R Packages* (2nd ed.). O'Reilly.
 * Zeileis, A., Kleiber, C. and Jackman, S. (2008). Regression models for count data in R. *Journal of Statistical Software*, 27(8), 1–25.
+
+# Appendix: side-by-side benchmark estimates {.appendix .unnumbered}
+
+```{r}
+#| label: tbl-app-nb-bio
+#| tbl-cap: "NB estimates and standard errors for bioChemists: nbreg() versus glm.nb()."
+kable(b$`NB, bioChemists`$table, digits = 6)
+```
+
+```{r}
+#| label: tbl-app-nb-nmes
+#| tbl-cap: "NB estimates and standard errors for NMES1988: nbreg() versus glm.nb()."
+kable(b$`NB, NMES1988`$table, digits = 6)
+```
+
+```{r}
+#| label: tbl-app-zinb-bio
+#| tbl-cap: "ZINB estimates and standard errors for bioChemists: zinbreg() versus zeroinfl()."
+kable(b$`ZINB, bioChemists`$table, digits = 5)
+```

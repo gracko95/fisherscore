@@ -6,7 +6,9 @@
 # SD of the estimates, and the coverage of 95% Wald intervals.
 #
 # Run from the package root:  Rscript inst/benchmark/simulation.R
-# Saves inst/benchmark/simulation_results.rds, which the report reads.
+# which also saves inst/benchmark/simulation_results.rds. The report runs this
+# same script (installed as benchmark/simulation.R) in a cached chunk that is
+# re-run whenever the package code changes.
 
 library(nbzinbKoo)
 
@@ -62,9 +64,11 @@ print(summary_table, digits = 3)
 cat(sprintf("\n%d of %d fits converged; median EM iterations %g; total time %.1f s\n",
             sum(sims[, "converged"]), R, median(sims[, "iter"]), elapsed))
 
-saveRDS(list(summary = summary_table, estimates = est, se = se,
-             converged = sims[, "converged"], iterations = sims[, "iter"],
-             settings = list(R = R, n = n, beta = beta, gamma = gamma, theta = theta,
-                             seed = 651),
-             elapsed = elapsed, session = utils::sessionInfo()),
-        file.path("inst", "benchmark", "simulation_results.rds"))
+results <- list(summary = summary_table, estimates = est, se = se,
+                converged = sims[, "converged"], iterations = sims[, "iter"],
+                settings = list(R = R, n = n, beta = beta, gamma = gamma, theta = theta,
+                                seed = 651),
+                elapsed = elapsed, session = utils::sessionInfo())
+# Save only when run from the package root (not when the report sources it)
+if (dir.exists(file.path("inst", "benchmark")))
+  saveRDS(results, file.path("inst", "benchmark", "simulation_results.rds"))

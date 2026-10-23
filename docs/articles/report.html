@@ -216,7 +216,7 @@ Table&nbsp;1: Maximum absolute differences from the reference implementations, i
 <td style="text-align: right;">6.7e-08</td>
 <td style="text-align: right;">4.5e-13</td>
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.015</td>
 <td style="text-align: right;">0.018</td>
 </tr>
 <tr class="even">
@@ -236,8 +236,8 @@ Table&nbsp;1: Maximum absolute differences from the reference implementations, i
 <td style="text-align: right;">1.3e-05</td>
 <td style="text-align: right;">-4.2e-08</td>
 <td style="text-align: right;">111</td>
-<td style="text-align: right;">1.065</td>
-<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">1.076</td>
+<td style="text-align: right;">0.042</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">ZINB, NMES1988</td>
@@ -246,8 +246,8 @@ Table&nbsp;1: Maximum absolute differences from the reference implementations, i
 <td style="text-align: right;">4.4e-06</td>
 <td style="text-align: right;">-1.6e-08</td>
 <td style="text-align: right;">53</td>
-<td style="text-align: right;">3.034</td>
-<td style="text-align: right;">0.197</td>
+<td style="text-align: right;">3.023</td>
+<td style="text-align: right;">0.196</td>
 </tr>
 </tbody>
 </table>
@@ -387,7 +387,7 @@ Table&nbsp;2: ZINB estimates and standard errors for NMES1988: zinbreg() versus 
 </figure>
 </div>
 </div>
-<p>The side-by-side tables for the other three fits are produced by <code>inst/benchmark/benchmark.R</code> and look the same. EM needs more iterations than BFGS and is slower (each M-step is itself an iterative fit), but every run converged and the log-likelihood never decreased.</p>
+<p>The side-by-side tables for the other three fits are in the Appendix (<a href="#tbl-app-nb-bio" class="quarto-xref">Table&nbsp;7</a>, <a href="#tbl-app-nb-nmes" class="quarto-xref">Table&nbsp;8</a> and <a href="#tbl-app-zinb-bio" class="quarto-xref">Table&nbsp;9</a>). EM needs more iterations than BFGS and is slower (each M-step is itself an iterative fit), but every run converged and the log-likelihood never decreased.</p>
 </section>
 <section id="simulation-study" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Simulation study</h1>
@@ -699,6 +699,290 @@ Table&nbsp;6: ZINB zero part: odds ratios (OR) of being a structural zero (a per
 <li>Wickham, H. and Bryan, J. (2023). <em>R Packages</em> (2nd ed.). O’Reilly.</li>
 <li>Zeileis, A., Kleiber, C. and Jackman, S. (2008). Regression models for count data in R. <em>Journal of Statistical Software</em>, 27(8), 1–25.</li>
 </ul>
+</section>
+<section id="appendix-side-by-side-benchmark-estimates" class="level1 appendix unnumbered">
+<h1 class="appendix unnumbered">Appendix: side-by-side benchmark estimates</h1>
+<div class="cell" data-layout-align="center">
+<div id="tbl-app-nb-bio" class="cell quarto-float quarto-figure quarto-figure-center" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-app-nb-bio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7: NB estimates and standard errors for bioChemists: nbreg() versus glm.nb().
+</figcaption>
+<div aria-describedby="tbl-app-nb-bio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Term</th>
+<th style="text-align: right;">nbreg</th>
+<th style="text-align: right;">glm.nb</th>
+<th style="text-align: right;">SE nbreg</th>
+<th style="text-align: right;">SE glm.nb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">0.256144</td>
+<td style="text-align: right;">0.256144</td>
+<td style="text-align: right;">0.137348</td>
+<td style="text-align: right;">0.137348</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">femWomen</td>
+<td style="text-align: right;">-0.216418</td>
+<td style="text-align: right;">-0.216418</td>
+<td style="text-align: right;">0.072636</td>
+<td style="text-align: right;">0.072636</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">marMarried</td>
+<td style="text-align: right;">0.150489</td>
+<td style="text-align: right;">0.150489</td>
+<td style="text-align: right;">0.082097</td>
+<td style="text-align: right;">0.082097</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kid5</td>
+<td style="text-align: right;">-0.176415</td>
+<td style="text-align: right;">-0.176415</td>
+<td style="text-align: right;">0.052813</td>
+<td style="text-align: right;">0.052813</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">phd</td>
+<td style="text-align: right;">0.015271</td>
+<td style="text-align: right;">0.015271</td>
+<td style="text-align: right;">0.035873</td>
+<td style="text-align: right;">0.035873</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ment</td>
+<td style="text-align: right;">0.029082</td>
+<td style="text-align: right;">0.029082</td>
+<td style="text-align: right;">0.003214</td>
+<td style="text-align: right;">0.003214</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">theta</td>
+<td style="text-align: right;">2.264388</td>
+<td style="text-align: right;">2.264388</td>
+<td style="text-align: right;">0.271176</td>
+<td style="text-align: right;">0.271175</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div id="tbl-app-nb-nmes" class="cell quarto-float quarto-figure quarto-figure-center" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-app-nb-nmes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;8: NB estimates and standard errors for NMES1988: nbreg() versus glm.nb().
+</figcaption>
+<div aria-describedby="tbl-app-nb-nmes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Term</th>
+<th style="text-align: right;">nbreg</th>
+<th style="text-align: right;">glm.nb</th>
+<th style="text-align: right;">SE nbreg</th>
+<th style="text-align: right;">SE glm.nb</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">(Intercept)</td>
+<td style="text-align: right;">0.929257</td>
+<td style="text-align: right;">0.929257</td>
+<td style="text-align: right;">0.054591</td>
+<td style="text-align: right;">0.054591</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">hospital</td>
+<td style="text-align: right;">0.217772</td>
+<td style="text-align: right;">0.217772</td>
+<td style="text-align: right;">0.020176</td>
+<td style="text-align: right;">0.020176</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">healthpoor</td>
+<td style="text-align: right;">0.305013</td>
+<td style="text-align: right;">0.305013</td>
+<td style="text-align: right;">0.048511</td>
+<td style="text-align: right;">0.048511</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">healthexcellent</td>
+<td style="text-align: right;">-0.341807</td>
+<td style="text-align: right;">-0.341807</td>
+<td style="text-align: right;">0.060924</td>
+<td style="text-align: right;">0.060924</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">chronic</td>
+<td style="text-align: right;">0.174916</td>
+<td style="text-align: right;">0.174916</td>
+<td style="text-align: right;">0.012092</td>
+<td style="text-align: right;">0.012092</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">gendermale</td>
+<td style="text-align: right;">-0.126488</td>
+<td style="text-align: right;">-0.126488</td>
+<td style="text-align: right;">0.031216</td>
+<td style="text-align: right;">0.031216</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">school</td>
+<td style="text-align: right;">0.026815</td>
+<td style="text-align: right;">0.026815</td>
+<td style="text-align: right;">0.004394</td>
+<td style="text-align: right;">0.004394</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">insuranceyes</td>
+<td style="text-align: right;">0.224402</td>
+<td style="text-align: right;">0.224402</td>
+<td style="text-align: right;">0.039464</td>
+<td style="text-align: right;">0.039464</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">theta</td>
+<td style="text-align: right;">1.206603</td>
+<td style="text-align: right;">1.206604</td>
+<td style="text-align: right;">0.033555</td>
+<td style="text-align: right;">0.033555</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell" data-layout-align="center">
+<div id="tbl-app-zinb-bio" class="cell quarto-float quarto-figure quarto-figure-center" data-layout-align="center">
+<figure class="quarto-float quarto-float-tbl">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-app-zinb-bio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;9: ZINB estimates and standard errors for bioChemists: zinbreg() versus zeroinfl().
+</figcaption>
+<div aria-describedby="tbl-app-zinb-bio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Term</th>
+<th style="text-align: right;">zinbreg</th>
+<th style="text-align: right;">zeroinfl</th>
+<th style="text-align: right;">SE zinbreg</th>
+<th style="text-align: right;">SE zeroinfl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">count_(Intercept)</td>
+<td style="text-align: right;">0.41675</td>
+<td style="text-align: right;">0.41675</td>
+<td style="text-align: right;">0.14360</td>
+<td style="text-align: right;">0.14360</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">count_femWomen</td>
+<td style="text-align: right;">-0.19550</td>
+<td style="text-align: right;">-0.19551</td>
+<td style="text-align: right;">0.07559</td>
+<td style="text-align: right;">0.07559</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">count_marMarried</td>
+<td style="text-align: right;">0.09758</td>
+<td style="text-align: right;">0.09758</td>
+<td style="text-align: right;">0.08445</td>
+<td style="text-align: right;">0.08445</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">count_kid5</td>
+<td style="text-align: right;">-0.15173</td>
+<td style="text-align: right;">-0.15173</td>
+<td style="text-align: right;">0.05421</td>
+<td style="text-align: right;">0.05421</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">count_phd</td>
+<td style="text-align: right;">-0.00070</td>
+<td style="text-align: right;">-0.00070</td>
+<td style="text-align: right;">0.03627</td>
+<td style="text-align: right;">0.03627</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">count_ment</td>
+<td style="text-align: right;">0.02479</td>
+<td style="text-align: right;">0.02479</td>
+<td style="text-align: right;">0.00349</td>
+<td style="text-align: right;">0.00349</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">zero_(Intercept)</td>
+<td style="text-align: right;">-0.19184</td>
+<td style="text-align: right;">-0.19169</td>
+<td style="text-align: right;">1.32272</td>
+<td style="text-align: right;">1.32282</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">zero_femWomen</td>
+<td style="text-align: right;">0.63595</td>
+<td style="text-align: right;">0.63593</td>
+<td style="text-align: right;">0.84885</td>
+<td style="text-align: right;">0.84892</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">zero_marMarried</td>
+<td style="text-align: right;">-1.49932</td>
+<td style="text-align: right;">-1.49947</td>
+<td style="text-align: right;">0.93859</td>
+<td style="text-align: right;">0.93867</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">zero_kid5</td>
+<td style="text-align: right;">0.62841</td>
+<td style="text-align: right;">0.62843</td>
+<td style="text-align: right;">0.44276</td>
+<td style="text-align: right;">0.44278</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">zero_phd</td>
+<td style="text-align: right;">-0.03768</td>
+<td style="text-align: right;">-0.03771</td>
+<td style="text-align: right;">0.30799</td>
+<td style="text-align: right;">0.30801</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">zero_ment</td>
+<td style="text-align: right;">-0.88222</td>
+<td style="text-align: right;">-0.88229</td>
+<td style="text-align: right;">0.31619</td>
+<td style="text-align: right;">0.31623</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">log(theta)</td>
+<td style="text-align: right;">0.97637</td>
+<td style="text-align: right;">0.97636</td>
+<td style="text-align: right;">0.13547</td>
+<td style="text-align: right;">0.13547</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
 </section>
 </main>
 
