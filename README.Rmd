@@ -6,13 +6,13 @@ output: github_document
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 ```
 
-# fisherscore
+# nbzinbKoo
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/gracko95/fisherscore/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gracko95/fisherscore/actions/workflows/R-CMD-check.yaml)
+[![R-CMD-check](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**fisherscore** fits generalized linear models by **Fisher scoring**
+**nbzinbKoo** fits generalized linear models by **Fisher scoring**
 (iteratively reweighted least squares), implemented from scratch, and lets
 you check its results and speed against `stats::glm()`. It has two engines:
 
@@ -31,13 +31,13 @@ Project for STA 651 (Categorical Data Analysis), Miami University.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("gracko95/fisherscore", build_vignettes = TRUE)
+remotes::install_github("gracko95/nbzinbKoo", build_vignettes = TRUE)
 ```
 
 ## Example
 
 ```{r example}
-library(fisherscore)
+library(nbzinbKoo)
 
 fit <- fs_glm(cbind(ncases, ncontrols) ~ agegp + alcgp,
               family = binomial, data = esoph, engine = "cpp")

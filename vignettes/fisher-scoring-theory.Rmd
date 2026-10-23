@@ -9,7 +9,7 @@ vignette: >
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(fisherscore)
+library(nbzinbKoo)
 ```
 
 ## The model
@@ -63,7 +63,7 @@ exactly the same steps. For non-canonical links (probit, cloglog, sqrt, the
 Poisson identity link) they are different algorithms with the same fixed
 point $\hat\beta$.
 
-## The algorithm in `fisherscore`
+## The algorithm in `nbzinbKoo`
 
 `fs_fit_r()` (pure R) and `fs_fit_cpp()` (RcppArmadillo) both do the following:
 

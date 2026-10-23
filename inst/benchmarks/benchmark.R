@@ -3,7 +3,7 @@
 # Run from the package root with:  Rscript inst/benchmarks/benchmark.R
 # Writes inst/benchmarks/results.csv and inst/benchmarks/benchmark.png.
 
-library(fisherscore)
+library(nbzinbKoo)
 stopifnot(requireNamespace("bench", quietly = TRUE))
 
 sim <- function(n, p, family) {

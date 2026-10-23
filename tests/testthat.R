@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(fisherscore)
+library(nbzinbKoo)
 
-test_check("fisherscore")
+test_check("nbzinbKoo")

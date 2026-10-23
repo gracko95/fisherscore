@@ -19,6 +19,6 @@
 #' @keywords internal
 #' @export
 fs_fit_cpp <- function(X, y, weights, offset, eta_start, start, family_code, link_code, epsilon, maxit, trace) {
-    .Call(`_fisherscore_fs_fit_cpp`, X, y, weights, offset, eta_start, start, family_code, link_code, epsilon, maxit, trace)
+    .Call(`_nbzinbKoo_fs_fit_cpp`, X, y, weights, offset, eta_start, start, family_code, link_code, epsilon, maxit, trace)
 }
 

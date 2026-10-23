@@ -1,4 +1,4 @@
-# fisherscore 0.1.0
+# nbzinbKoo 0.1.0
 
 * First release: `fs_glm()` fits binomial (logit, probit, cloglog), poisson
   (log, identity, sqrt) and gaussian (identity) GLMs by Fisher scoring, with

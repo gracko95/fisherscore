@@ -34,7 +34,7 @@ compare_glm <- function(formula, family = gaussian, data, ..., engines = c("R", 
   fits <- list(glm = g)
   t <- c(glm = med_time(cl))
   for (e in engines) {
-    cl[[1L]] <- quote(fisherscore::fs_glm)
+    cl[[1L]] <- quote(nbzinbKoo::fs_glm)
     cl$engine <- e
     fits[[paste0("fs_", e)]] <- eval(cl, env)
     t[paste0("fs_", e)] <- med_time(cl)

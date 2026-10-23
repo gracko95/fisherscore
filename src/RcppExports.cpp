@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // fs_fit_cpp
 List fs_fit_cpp(const arma::mat& X, const arma::vec& y, const arma::vec& weights, const arma::vec& offset, const arma::vec& eta_start, const arma::vec& start, int family_code, int link_code, double epsilon, int maxit, bool trace);
-RcppExport SEXP _fisherscore_fs_fit_cpp(SEXP XSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP offsetSEXP, SEXP eta_startSEXP, SEXP startSEXP, SEXP family_codeSEXP, SEXP link_codeSEXP, SEXP epsilonSEXP, SEXP maxitSEXP, SEXP traceSEXP) {
+RcppExport SEXP _nbzinbKoo_fs_fit_cpp(SEXP XSEXP, SEXP ySEXP, SEXP weightsSEXP, SEXP offsetSEXP, SEXP eta_startSEXP, SEXP startSEXP, SEXP family_codeSEXP, SEXP link_codeSEXP, SEXP epsilonSEXP, SEXP maxitSEXP, SEXP traceSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -34,11 +34,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_fisherscore_fs_fit_cpp", (DL_FUNC) &_fisherscore_fs_fit_cpp, 11},
+    {"_nbzinbKoo_fs_fit_cpp", (DL_FUNC) &_nbzinbKoo_fs_fit_cpp, 11},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_fisherscore(DllInfo *dll) {
+RcppExport void R_init_nbzinbKoo(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

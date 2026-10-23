@@ -40,4 +40,4 @@ importFrom(stats,
   residuals,
   vcov
 )
-useDynLib(fisherscore, .registration = TRUE)
+useDynLib(nbzinbKoo, .registration = TRUE)

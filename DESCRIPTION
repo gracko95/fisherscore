@@ -1,12 +1,15 @@
-Package: fisherscore
-Title: Fisher Scoring for Generalized Linear Models
+Package: nbzinbKoo
+Title: Negative Binomial and Zero-Inflated Negative Binomial Regression by IRLS
 Version: 0.1.0
 Authors@R: 
     person("Grace", "Koo", , "koogc@miamioh.edu", role = c("aut", "cre"))
-Description: Implements Fisher scoring (iteratively reweighted least
-    squares) for generalized linear models from scratch, with a pure R
-    engine and an RcppArmadillo engine, and tools to compare results and
-    speed against stats::glm().
+Description: Fits negative binomial (NB2) regression by iteratively
+    reweighted least squares alternated with Newton-Raphson for the
+    dispersion parameter, and zero-inflated negative binomial regression
+    by an EM algorithm whose M-steps are IRLS fits. Built on a Fisher
+    scoring engine for generalized linear models, with pure R and
+    RcppArmadillo implementations and tools to compare results and speed
+    against stats::glm().
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

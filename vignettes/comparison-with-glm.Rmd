@@ -1,15 +1,15 @@
 ---
-title: "Comparing fisherscore with glm()"
+title: "Comparing nbzinbKoo with glm()"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Comparing fisherscore with glm()}
+  %\VignetteIndexEntry{Comparing nbzinbKoo with glm()}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
-library(fisherscore)
+library(nbzinbKoo)
 ```
 
 ## Side by side
@@ -85,7 +85,7 @@ The script `inst/benchmarks/benchmark.R` times all three methods for
 $n$ from $10^3$ to $10^6$ and $p \in \{5, 50\}$. Results saved by the script:
 
 ```{r}
-res_file <- system.file("benchmarks", "results.csv", package = "fisherscore")
+res_file <- system.file("benchmarks", "results.csv", package = "nbzinbKoo")
 if (nzchar(res_file)) {
   res <- read.csv(res_file)
   wide <- reshape(res[, c("family", "n", "p", "method", "median_sec")],
@@ -97,7 +97,7 @@ if (nzchar(res_file)) {
 ```
 
 ```{r, echo = FALSE, out.width = "100%"}
-png_file <- system.file("benchmarks", "benchmark.png", package = "fisherscore")
+png_file <- system.file("benchmarks", "benchmark.png", package = "nbzinbKoo")
 if (nzchar(png_file)) knitr::include_graphics(png_file)
 ```
 
