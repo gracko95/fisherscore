@@ -9,6 +9,8 @@ Description: Fits negative binomial (NB2) regression by iteratively
     by an EM algorithm whose M-steps are IRLS fits, without calling a
     general-purpose optimizer. Standard errors for the zero-inflated model
     come from the analytic observed information matrix.
+Depends: 
+    R (>= 3.5.0)
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
