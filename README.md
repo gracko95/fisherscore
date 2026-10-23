@@ -113,9 +113,6 @@ head(predict(zinb, type = "zero"))   # estimated probability of a structural zer
 | `nbreg_control()`, `zinbreg_control()` | Tolerances, maximum iterations, `trace`, Hessian type |
 | `print`, `summary`, `coef`, `vcov`, `logLik`, `AIC`/`BIC`, `fitted`, `residuals`, `nobs`, `predict` | S3 methods for both classes |
 
-The package also still contains the Fisher scoring GLM engine (`fs_glm()`)
-from earlier coursework; it is not used by `nbreg()` or `zinbreg()`.
-
 ## Benchmarks and simulation
 
 * `inst/benchmark/benchmark.R`: estimates, SEs, $\theta$, log-likelihood and
@@ -132,5 +129,4 @@ from earlier coursework; it is not used by `nbreg()` or `zinbreg()`.
 explained here:
 
 * TODO: list each NOTE from your final `devtools::check()` run and why it is
-  harmless (for example, a NOTE about the installed size of the compiled
-  `fs_glm` C++ engine on some platforms).
+  harmless (or write "None" if there are no NOTEs).

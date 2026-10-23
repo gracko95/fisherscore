@@ -126,13 +126,6 @@ derivatives, QR weighted least squares). Benchmark and simulation scripts and
 their saved .rds results are in inst/benchmark/; the report reads
 simulation_results.rds via system.file(), so reinstall after re-running it.
 
-Left over from the package's earlier life as fisherscore (not used by
-nbreg/zinbreg): the Fisher scoring GLM engine fs_glm() (R/fs_glm.R,
-R/fit_r.R, R/families.R, R/control.R, R/fs_glm-methods.R, src/ C++ engine),
-R/compare.R, the two vignettes and their tests. R/compare.R calls stats::glm()
-inside R/ and every fs_glm line matches the prohibited-function grep: remove
-these files, or move compare.R to inst/benchmark/, or be ready to justify them.
-
 ## Key dates
 - Submission: Monday Nov 2, 2026, 11:59 PM Eastern (PDF report + repo link on
   Canvas, Pages URL in the comment). The repo is graded as of the last commit

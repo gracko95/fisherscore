@@ -24,21 +24,12 @@ export(nbreg)
 export(nbreg_control)
 export(zinbreg)
 export(zinbreg_control)
-importFrom(Rcpp,sourceCpp)
 importFrom(stats,
-  anova,
-  binomial,
   coef,
-  confint,
-  deviance,
   fitted,
-  formula,
-  gaussian,
   logLik,
   nobs,
-  poisson,
   predict,
   residuals,
   vcov
 )
-useDynLib(nbzinbKoo, .registration = TRUE)
