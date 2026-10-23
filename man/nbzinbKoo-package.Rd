@@ -6,7 +6,16 @@
 \alias{nbzinbKoo-package}
 \title{nbzinbKoo: Negative Binomial and Zero-Inflated Negative Binomial Regression by IRLS}
 \description{
-Fits negative binomial (NB2) regression by iteratively reweighted least squares alternated with Newton-Raphson for the dispersion parameter, and zero-inflated negative binomial regression by an EM algorithm whose M-steps are IRLS fits. Built on a Fisher scoring engine for generalized linear models, with pure R and RcppArmadillo implementations and tools to compare results and speed against stats::glm().
+Fits negative binomial (NB2) regression by iteratively reweighted least squares alternated with Newton-Raphson for the dispersion parameter, and zero-inflated negative binomial regression by an EM algorithm whose M-steps are IRLS fits, without calling a general-purpose optimizer. Standard errors for the zero-inflated model come from the analytic observed information matrix.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/gracko95/nbzinbKoo}
+  \item \url{https://gracko95.github.io/nbzinbKoo/}
+  \item Report bugs at \url{https://github.com/gracko95/nbzinbKoo/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Grace Koo \email{koogc@miamioh.edu}
