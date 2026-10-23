@@ -6,26 +6,26 @@
 [![R-CMD-check](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**nbzinbKoo** fits generalized linear models by **Fisher scoring**
-(iteratively reweighted least squares), implemented from scratch, and lets
-you check its results and speed against `stats::glm()`. It has two engines:
+**nbzinbKoo** fits **negative binomial (NB2)** and **zero-inflated negative
+binomial (ZINB)** regression models with algorithms written from scratch,
+without `optim()` or any other general-purpose optimizer:
 
-* `engine = "R"`: a readable pure-R implementation ([`R/fit_r.R`](R/fit_r.R))
-* `engine = "cpp"`: an RcppArmadillo implementation ([`src/fisher_scoring.cpp`](src/fisher_scoring.cpp))
+* `nbreg()`: IRLS for the coefficients alternated with Newton-Raphson for
+  $\log\theta$ (results match `MASS::glm.nb()` to about $10^{-8}$);
+* `zinbreg()`: an EM algorithm whose M-steps are a weighted logistic IRLS fit
+  (zero part) and the weighted NB fit above (count part), with standard
+  errors from the analytic observed information matrix (results match
+  `pscl::zeroinfl()` well within $10^{-3}$).
 
-| Family     | Links                        |
-|------------|------------------------------|
-| `binomial` | `logit`, `probit`, `cloglog` |
-| `poisson`  | `log`, `identity`, `sqrt`    |
-| `gaussian` | `identity`                   |
+Website and project report: <https://gracko95.github.io/nbzinbKoo/>
 
-Project for STA 651 (Categorical Data Analysis), Miami University.
+STA 651 (Categorical Data Analysis) final project, Miami University, Fall 2026.
 
 ## Installation
 
 ```r
-# install.packages("remotes")
-remotes::install_github("gracko95/nbzinbKoo", build_vignettes = TRUE)
+# install.packages("devtools")
+devtools::install_github("gracko95/nbzinbKoo")
 ```
 
 ## Example
@@ -33,95 +33,104 @@ remotes::install_github("gracko95/nbzinbKoo", build_vignettes = TRUE)
 
 ``` r
 library(nbzinbKoo)
+data("bioChemists", package = "pscl")
 
-fit <- fs_glm(cbind(ncases, ncontrols) ~ agegp + alcgp,
-              family = binomial, data = esoph, engine = "cpp")
-summary(fit)
+# Negative binomial regression
+nb <- nbreg(art ~ fem + mar + kid5 + phd + ment, data = bioChemists)
+summary(nb)
 #> 
 #> Call:
-#> fs_glm(formula = cbind(ncases, ncontrols) ~ agegp + alcgp, family = binomial, 
-#>     data = esoph, engine = "cpp")
+#> nbreg(formula = art ~ fem + mar + kid5 + phd + ment, data = bioChemists)
 #> 
-#> Deviance Residuals:
+#> Pearson residuals:
 #>     Min      1Q  Median      3Q     Max 
-#> -2.2395 -0.7186 -0.2324  0.7930  3.3538 
+#> -1.2677 -0.8754 -0.2613  0.4983  6.6573 
 #> 
-#> Coefficients:
-#>             Estimate Std. Error z value Pr(>|z|)    
-#> (Intercept) -1.40326    0.20118  -6.975 3.05e-12 ***
-#> agegp.L      3.68318    0.67270   5.475 4.37e-08 ***
-#> agegp.Q     -1.45594    0.60521  -2.406   0.0161 *  
-#> agegp.C      0.07238    0.46100   0.157   0.8752    
-#> agegp^4      0.22662    0.31988   0.708   0.4787    
-#> agegp^5     -0.25374    0.20994  -1.209   0.2268    
-#> alcgp.L      2.59671    0.25799  10.065  < 2e-16 ***
-#> alcgp.Q      0.11930    0.21915   0.544   0.5862    
-#> alcgp.C      0.43863    0.17823   2.461   0.0139 *  
+#> Coefficients (negative binomial with log link):
+#>              Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)  0.256144   0.137348   1.865 0.062191 .  
+#> femWomen    -0.216418   0.072636  -2.979 0.002887 ** 
+#> marMarried   0.150489   0.082097   1.833 0.066791 .  
+#> kid5        -0.176415   0.052813  -3.340 0.000837 ***
+#> phd          0.015271   0.035873   0.426 0.670326    
+#> ment         0.029082   0.003214   9.048  < 2e-16 ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
-#> (Dispersion parameter for binomial family taken to be 1)
+#> Theta = 2.26439 (SE 0.2712)
+#> Log-likelihood: -1560.958 on 7 Df,  AIC: 3135.917
+#> Outer iterations (IRLS + Newton-Raphson): 4
+
+# Zero-inflated NB: count covariates before |, zero-inflation covariates after
+zinb <- zinbreg(art ~ fem + mar + kid5 + phd + ment | ment, data = bioChemists)
+summary(zinb)
 #> 
-#>     Null deviance: 367.95 on 87 degrees of freedom
-#> Residual deviance: 105.88 on 79 degrees of freedom
-#> AIC: 238.94
+#> Call:
+#> zinbreg(formula = art ~ fem + mar + kid5 + phd + ment | ment, 
+#>     data = bioChemists)
 #> 
-#> Number of Fisher Scoring iterations: 6 (cpp engine)
+#> Pearson residuals:
+#>     Min      1Q  Median      3Q     Max 
+#> -1.3041 -0.7684 -0.2632  0.4671  6.3765 
+#> 
+#> Count model coefficients (negbin with log link):
+#>              Estimate Std. Error z value Pr(>|z|)    
+#> (Intercept)  0.404014   0.141715   2.851  0.00436 ** 
+#> femWomen    -0.211906   0.071922  -2.946  0.00322 ** 
+#> marMarried   0.139462   0.081192   1.718  0.08586 .  
+#> kid5        -0.167624   0.052457  -3.195  0.00140 ** 
+#> phd          0.001963   0.035586   0.055  0.95602    
+#> ment         0.024393   0.003518   6.934 4.08e-12 ***
+#> Log(theta)   1.002910   0.142830   7.022 2.19e-12 ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Zero-inflation model coefficients (binomial with logit link):
+#>             Estimate Std. Error z value Pr(>|z|)  
+#> (Intercept)  -0.8067     0.3532  -2.284   0.0224 *
+#> ment         -0.6094     0.2458  -2.480   0.0131 *
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Theta = 2.7262 (SE 0.3894)
+#> Log-likelihood: -1553.271 on 9 Df,  AIC: 3124.542
+#> EM iterations: 112; log-likelihood never decreased: TRUE
+AIC(nb, zinb)
+#>      df      AIC
+#> nb    7 3135.917
+#> zinb  9 3124.542
+head(predict(zinb, type = "zero"))   # estimated probability of a structural zero
+#>            1            2            3            4            5            6 
+#> 6.226167e-03 1.139290e-02 1.139290e-02 6.692070e-02 5.862284e-08 1.165473e-01
 ```
 
-### Compare with `glm()`
-
-
-``` r
-compare_glm(breaks ~ wool * tension, family = poisson, data = warpbreaks)
-#> Coefficients and standard errors:
-#>            term   glm_est    glm_se  fs_R_est   fs_R_se fs_cpp_est fs_cpp_se
-#>     (Intercept)  3.796737 0.0499375  3.796737 0.0499375   3.796737 0.0499375
-#>           woolB -0.456627 0.0801920 -0.456627 0.0801920  -0.456627 0.0801920
-#>        tensionM -0.618683 0.0844001 -0.618683 0.0844001  -0.618683 0.0844001
-#>        tensionH -0.595799 0.0837772 -0.595799 0.0837772  -0.595799 0.0837772
-#>  woolB:tensionM  0.638177 0.1221531  0.638177 0.1221531   0.638177 0.1221531
-#>  woolB:tensionH  0.188363 0.1298953  0.188363 0.1298953   0.188363 0.1298953
-#> 
-#> Fit summary (differences are relative to stats::glm):
-#>  method deviance     aic iterations converged time_sec max_coef_diff
-#>     glm  182.305 468.969          4      TRUE    0.001      0.00e+00
-#>    fs_R  182.305 468.969          4      TRUE    0.016      0.00e+00
-#>  fs_cpp  182.305 468.969          4      TRUE    0.015      4.88e-15
-#>  max_se_diff
-#>     0.00e+00
-#>     0.00e+00
-#>     2.36e-16
-```
-
-Estimates, standard errors, deviance, AIC and iteration counts match
-`glm()` to about $10^{-15}$ for every supported family and link.
-
-## Algorithm
-
-At each iteration, with $\eta = X\beta$, $\mu = g^{-1}(\eta)$:
-
-$$
-w_i = \frac{(\partial\mu_i/\partial\eta_i)^2}{V(\mu_i)}, \qquad
-z_i = \eta_i + (y_i-\mu_i)\frac{\partial\eta_i}{\partial\mu_i}, \qquad
-\beta^{(t+1)} = (X^\top W X)^{-1}X^\top W z
-= \beta^{(t)} + \mathcal{I}(\beta^{(t)})^{-1}U(\beta^{(t)}).
-$$
-
-The weighted least squares step is solved by a QR decomposition, and
-iteration stops when the relative change in deviance falls below
-`epsilon` (default `1e-8`). See `vignette("fisher-scoring-theory")` for the
-derivation and `vignette("comparison-with-glm")` for the accuracy and
-speed study.
-
-## Functions
+## Main functions
 
 | Function | Purpose |
 |---|---|
-| `fs_glm()` | Fit a GLM (formula interface, like `glm()`) |
-| `fs_fit_r()`, `fs_fit_cpp()` | Low-level engines on a model matrix |
-| `fs_family()` | Hand-written links, variance and deviance functions |
-| `fs_control()` | Tolerance, maximum iterations, tracing |
-| `compare_glm()` | Accuracy and timing compared with `glm()` |
-| `plot_convergence()` | Deviance or convergence criterion by iteration |
-| `summary`, `predict`, `residuals`, `anova`, `confint`, `vcov`, `logLik`, ... | S3 methods |
+| `nbreg(formula, data, offset, control)` | NB2 regression by IRLS + Newton-Raphson for theta |
+| `zinbreg(formula, data, offset, control)` | ZINB regression by EM with IRLS M-steps (`y ~ x | z`) |
+| `nbreg_control()`, `zinbreg_control()` | Tolerances, maximum iterations, `trace`, Hessian type |
+| `print`, `summary`, `coef`, `vcov`, `logLik`, `AIC`/`BIC`, `fitted`, `residuals`, `nobs`, `predict` | S3 methods for both classes |
+
+The package also still contains the Fisher scoring GLM engine (`fs_glm()`)
+from earlier coursework; it is not used by `nbreg()` or `zinbreg()`.
+
+## Benchmarks and simulation
+
+* `inst/benchmark/benchmark.R`: estimates, SEs, $\theta$, log-likelihood and
+  timing against `glm.nb()` and `zeroinfl()` on `pscl::bioChemists` and
+  `AER::NMES1988`.
+* `inst/benchmark/simulation.R`: 200 simulated ZINB data sets ($n = 500$);
+  bias, SE accuracy and 95% Wald coverage.
+* The full report is `report/report.pdf` and the
+  [Report article](https://gracko95.github.io/nbzinbKoo/articles/report.html).
+
+## R CMD check notes
+
+`devtools::check()` gives 0 errors and 0 warnings. Any remaining NOTEs are
+explained here:
+
+* TODO: list each NOTE from your final `devtools::check()` run and why it is
+  harmless (for example, a NOTE about the installed size of the compiled
+  `fs_glm` C++ engine on some platforms).

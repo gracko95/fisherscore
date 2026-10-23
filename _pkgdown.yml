@@ -1,0 +1,46 @@
+url: https://gracko95.github.io/nbzinbKoo/
+destination: docs
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: Final project report
+        href: articles/report.html
+
+reference:
+- title: Regression models
+  desc: NB and ZINB regression fitted by IRLS, Newton-Raphson and EM.
+  contents:
+  - nbreg
+  - zinbreg
+  - nbreg_control
+  - zinbreg_control
+- title: Methods
+  contents:
+  - nbreg-methods
+  - zinbreg-methods
+- title: Fisher scoring GLM engine (earlier coursework)
+  contents:
+  - fs_glm
+  - fs_glm-methods
+  - fs_fit_r
+  - fs_fit_cpp
+  - fs_family
+  - fs_control
+  - compare_glm
+  - plot_convergence
+
+articles:
+- title: Report
+  contents:
+  - articles/report
+- title: Fisher scoring GLM engine
+  contents:
+  - fisher-scoring-theory
+  - comparison-with-glm

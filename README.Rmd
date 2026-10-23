@@ -12,72 +12,72 @@ knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 [![R-CMD-check](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gracko95/nbzinbKoo/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**nbzinbKoo** fits generalized linear models by **Fisher scoring**
-(iteratively reweighted least squares), implemented from scratch, and lets
-you check its results and speed against `stats::glm()`. It has two engines:
+**nbzinbKoo** fits **negative binomial (NB2)** and **zero-inflated negative
+binomial (ZINB)** regression models with algorithms written from scratch,
+without `optim()` or any other general-purpose optimizer:
 
-* `engine = "R"`: a readable pure-R implementation ([`R/fit_r.R`](R/fit_r.R))
-* `engine = "cpp"`: an RcppArmadillo implementation ([`src/fisher_scoring.cpp`](src/fisher_scoring.cpp))
+* `nbreg()`: IRLS for the coefficients alternated with Newton-Raphson for
+  $\log\theta$ (results match `MASS::glm.nb()` to about $10^{-8}$);
+* `zinbreg()`: an EM algorithm whose M-steps are a weighted logistic IRLS fit
+  (zero part) and the weighted NB fit above (count part), with standard
+  errors from the analytic observed information matrix (results match
+  `pscl::zeroinfl()` well within $10^{-3}$).
 
-| Family     | Links                        |
-|------------|------------------------------|
-| `binomial` | `logit`, `probit`, `cloglog` |
-| `poisson`  | `log`, `identity`, `sqrt`    |
-| `gaussian` | `identity`                   |
+Website and project report: <https://gracko95.github.io/nbzinbKoo/>
 
-Project for STA 651 (Categorical Data Analysis), Miami University.
+STA 651 (Categorical Data Analysis) final project, Miami University, Fall 2026.
 
 ## Installation
 
 ```r
-# install.packages("remotes")
-remotes::install_github("gracko95/nbzinbKoo", build_vignettes = TRUE)
+# install.packages("devtools")
+devtools::install_github("gracko95/nbzinbKoo")
 ```
 
 ## Example
 
 ```{r example}
 library(nbzinbKoo)
+data("bioChemists", package = "pscl")
 
-fit <- fs_glm(cbind(ncases, ncontrols) ~ agegp + alcgp,
-              family = binomial, data = esoph, engine = "cpp")
-summary(fit)
+# Negative binomial regression
+nb <- nbreg(art ~ fem + mar + kid5 + phd + ment, data = bioChemists)
+summary(nb)
+
+# Zero-inflated NB: count covariates before |, zero-inflation covariates after
+zinb <- zinbreg(art ~ fem + mar + kid5 + phd + ment | ment, data = bioChemists)
+summary(zinb)
+AIC(nb, zinb)
+head(predict(zinb, type = "zero"))   # estimated probability of a structural zero
 ```
 
-### Compare with `glm()`
-
-```{r compare}
-compare_glm(breaks ~ wool * tension, family = poisson, data = warpbreaks)
-```
-
-Estimates, standard errors, deviance, AIC and iteration counts match
-`glm()` to about $10^{-15}$ for every supported family and link.
-
-## Algorithm
-
-At each iteration, with $\eta = X\beta$, $\mu = g^{-1}(\eta)$:
-
-$$
-w_i = \frac{(\partial\mu_i/\partial\eta_i)^2}{V(\mu_i)}, \qquad
-z_i = \eta_i + (y_i-\mu_i)\frac{\partial\eta_i}{\partial\mu_i}, \qquad
-\beta^{(t+1)} = (X^\top W X)^{-1}X^\top W z
-= \beta^{(t)} + \mathcal{I}(\beta^{(t)})^{-1}U(\beta^{(t)}).
-$$
-
-The weighted least squares step is solved by a QR decomposition, and
-iteration stops when the relative change in deviance falls below
-`epsilon` (default `1e-8`). See `vignette("fisher-scoring-theory")` for the
-derivation and `vignette("comparison-with-glm")` for the accuracy and
-speed study.
-
-## Functions
+## Main functions
 
 | Function | Purpose |
 |---|---|
-| `fs_glm()` | Fit a GLM (formula interface, like `glm()`) |
-| `fs_fit_r()`, `fs_fit_cpp()` | Low-level engines on a model matrix |
-| `fs_family()` | Hand-written links, variance and deviance functions |
-| `fs_control()` | Tolerance, maximum iterations, tracing |
-| `compare_glm()` | Accuracy and timing compared with `glm()` |
-| `plot_convergence()` | Deviance or convergence criterion by iteration |
-| `summary`, `predict`, `residuals`, `anova`, `confint`, `vcov`, `logLik`, ... | S3 methods |
+| `nbreg(formula, data, offset, control)` | NB2 regression by IRLS + Newton-Raphson for theta |
+| `zinbreg(formula, data, offset, control)` | ZINB regression by EM with IRLS M-steps (`y ~ x | z`) |
+| `nbreg_control()`, `zinbreg_control()` | Tolerances, maximum iterations, `trace`, Hessian type |
+| `print`, `summary`, `coef`, `vcov`, `logLik`, `AIC`/`BIC`, `fitted`, `residuals`, `nobs`, `predict` | S3 methods for both classes |
+
+The package also still contains the Fisher scoring GLM engine (`fs_glm()`)
+from earlier coursework; it is not used by `nbreg()` or `zinbreg()`.
+
+## Benchmarks and simulation
+
+* `inst/benchmark/benchmark.R`: estimates, SEs, $\theta$, log-likelihood and
+  timing against `glm.nb()` and `zeroinfl()` on `pscl::bioChemists` and
+  `AER::NMES1988`.
+* `inst/benchmark/simulation.R`: 200 simulated ZINB data sets ($n = 500$);
+  bias, SE accuracy and 95% Wald coverage.
+* The full report is `report/report.pdf` and the
+  [Report article](https://gracko95.github.io/nbzinbKoo/articles/report.html).
+
+## R CMD check notes
+
+`devtools::check()` gives 0 errors and 0 warnings. Any remaining NOTEs are
+explained here:
+
+* TODO: list each NOTE from your final `devtools::check()` run and why it is
+  harmless (for example, a NOTE about the installed size of the compiled
+  `fs_glm` C++ engine on some platforms).

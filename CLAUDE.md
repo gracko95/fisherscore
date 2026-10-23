@@ -119,13 +119,19 @@ fine; report it. Reference: on bioChemists EM converges in about 120 iterations.
   .github/workflows/R-CMD-check.yaml.
 
 ## Existing code in this repo
-This package was renamed from fisherscore. It already contains a Fisher scoring
-GLM engine (fs_glm(), fs_fit_r(), C++ fs_fit_cpp()), matched to glm() for
-binomial, poisson and gaussian families. The IRLS/QR machinery can be reused for
-the beta step of nbreg() and the zero-part M-step. Known issues for the project:
-- R/compare.R calls stats::glm() inside R/. Move it to tests/ or inst/benchmark/,
-  or be ready to justify it, since the prohibited-function grep will flag it.
-- The existing benchmark lives in inst/benchmarks/; the spec expects inst/benchmark/.
+Project code (pure R, no compiled code): R/nbreg.R (nbreg, nbreg_control,
+nb_fit engine reused by the ZINB M-step), R/zinbreg.R (zinbreg, EM engine,
+analytic Hessian), R/methods.R (S3 methods), R/utils.R (log-likelihood, theta
+derivatives, QR weighted least squares). Benchmark and simulation scripts and
+their saved .rds results are in inst/benchmark/; the report reads
+simulation_results.rds via system.file(), so reinstall after re-running it.
+
+Left over from the package's earlier life as fisherscore (not used by
+nbreg/zinbreg): the Fisher scoring GLM engine fs_glm() (R/fs_glm.R,
+R/fit_r.R, R/families.R, R/control.R, R/fs_glm-methods.R, src/ C++ engine),
+R/compare.R, the two vignettes and their tests. R/compare.R calls stats::glm()
+inside R/ and every fs_glm line matches the prohibited-function grep: remove
+these files, or move compare.R to inst/benchmark/, or be ready to justify them.
 
 ## Key dates
 - Submission: Monday Nov 2, 2026, 11:59 PM Eastern (PDF report + repo link on

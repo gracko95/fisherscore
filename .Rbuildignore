@@ -8,3 +8,6 @@
 ^\.Rproj\.user$
 ^project-docs$
 ^CLAUDE\.md$
+^vignettes/articles$
+^report$
+^\.quarto$

@@ -3,8 +3,12 @@
 .RData
 .DS_Store
 inst/doc
-docs
 *.o
 *.so
 *.dll
 project-docs/
+.quarto
+vignettes/articles/report_files/
+vignettes/articles/report.tex
+vignettes/articles/*.pdf
+vignettes/articles/*.html
