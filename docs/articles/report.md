@@ -168,9 +168,9 @@ higher maximum.
 | Fit               |    Coef |      SE |   theta |   logLik | Iter | Time (ours) | Time (ref.) |
 |:------------------|--------:|--------:|--------:|---------:|-----:|------------:|------------:|
 | NB, bioChemists   | 2.1e-08 | 9.8e-10 | 6.7e-08 |  4.5e-13 |    4 |       0.016 |       0.018 |
-| NB, NMES1988      | 4.7e-08 | 9.2e-10 | 4.3e-08 |  7.1e-11 |    3 |       0.077 |       0.065 |
-| ZINB, bioChemists | 1.5e-04 | 9.4e-05 | 1.3e-05 | -4.2e-08 |  111 |       1.139 |       0.042 |
-| ZINB, NMES1988    | 2.6e-05 | 1.7e-05 | 4.4e-06 | -1.6e-08 |   53 |       3.036 |       0.200 |
+| NB, NMES1988      | 4.7e-08 | 9.2e-10 | 4.3e-08 |  7.1e-11 |    3 |       0.076 |       0.064 |
+| ZINB, bioChemists | 1.5e-04 | 9.4e-05 | 1.3e-05 | -4.2e-08 |  111 |       1.065 |       0.041 |
+| ZINB, NMES1988    | 2.6e-05 | 1.7e-05 | 4.4e-06 | -1.6e-08 |   53 |       3.034 |       0.197 |
 
 Table 1: Maximum absolute differences from the reference
 implementations, iterations of our algorithm (outer NB iterations or EM

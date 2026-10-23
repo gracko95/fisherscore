@@ -72,8 +72,7 @@ head(predict(zinb, type = "zero"))   # estimated probability of a structural zer
 
 ## R CMD check notes
 
-`devtools::check()` gives 0 errors and 0 warnings. Any remaining NOTEs are
-explained here:
-
-* TODO: list each NOTE from your final `devtools::check()` run and why it is
-  harmless (or write "None" if there are no NOTEs).
+`devtools::check()` finishes with 0 errors, 0 warnings and 0 NOTEs. The
+report lives in `vignettes/articles/` and is excluded from the package build
+(`.Rbuildignore`), so it is published only on the website and as
+`report/report.pdf`.
