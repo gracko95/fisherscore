@@ -7,7 +7,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^project-docs$
-^CLAUDE\.md$
+^\.claude$
 ^vignettes/articles$
 ^report$
 ^\.quarto$

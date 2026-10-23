@@ -31,7 +31,8 @@ sci <- function(x) formatC(x, format = "e", digits = 1)
 
 <!--
 Writing guide (delete this comment before submitting):
-- Every number in the text should come from inline R code, e.g. `r round(x, 2)`.
+- Every number in the text should come from inline R code: a backtick, the
+  letter r, a space, the expression, and a closing backtick.
 - Sections marked TODO need YOUR own words: the interpretation (Section 6),
   the discussion (Section 7) and the AI-use statement (Section 8).
 - Render: quarto render vignettes/articles/report.qmd --to pdf
