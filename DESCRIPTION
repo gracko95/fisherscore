@@ -6,21 +6,24 @@ Authors@R:
 Description: Fits negative binomial (NB2) regression by iteratively
     reweighted least squares alternated with Newton-Raphson for the
     dispersion parameter, and zero-inflated negative binomial regression
-    by an EM algorithm whose M-steps are IRLS fits. Built on a Fisher
-    scoring engine for generalized linear models, with pure R and
-    RcppArmadillo implementations and tools to compare results and speed
-    against stats::glm().
+    by an EM algorithm whose M-steps are IRLS fits, without calling a
+    general-purpose optimizer. Standard errors for the zero-inflated model
+    come from the analytic observed information matrix.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Suggests: 
+    AER,
     bench,
     knitr,
     MASS,
+    numDeriv,
+    pscl,
     rmarkdown,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 Imports: 
+    Formula,
     graphics,
     Rcpp,
     stats
@@ -28,4 +31,6 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 Config/roxygen2/version: 8.1.0
+URL: https://github.com/gracko95/nbzinbKoo, https://gracko95.github.io/nbzinbKoo/
+BugReports: https://github.com/gracko95/nbzinbKoo/issues
 VignetteBuilder: knitr
